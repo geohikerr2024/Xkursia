@@ -1,0 +1,1946 @@
+import React, { useState, useMemo } from 'react';
+import {
+  MapPin,
+  Navigation,
+  Users,
+  Bus,
+  Calendar,
+  Search,
+  Star,
+  ShieldCheck,
+  CheckCircle,
+  Send,
+  Globe,
+  Plus,
+  Check,
+  X,
+  Clock,
+  Sparkles,
+  Phone,
+  SlidersHorizontal,
+  Heart,
+  Share2,
+  Compass,
+  Award,
+  AlertCircle,
+  Building2,
+  Trees,
+  Utensils,
+  Mountain,
+  ChevronRight,
+  ExternalLink
+} from 'lucide-react';
+
+/**
+ * ============================================================================
+ * XKURSIA.GE - GEORGIA EXCURSION, TOUR & TRANSPORT AGGREGATOR PLATFORM
+ * Complete Production-Ready Single-File Application (React + Tailwind CSS)
+ * Ready for GitHub Deployment & Supabase Backend Connection
+ * ============================================================================
+ */
+
+// --- SUPABASE CONFIGURATION PLACEHOLDER (Replace with your actual env variables in GitHub/Vercel) ---
+const SUPABASE_CONFIG = {
+  url: 'https://feywspfhqoizsveotvmy.supabase.co', // From your Supabase dashboard screenshot
+  anonKey: 'YOUR_SUPABASE_ANON_KEY_HERE'
+};
+
+// --- INITIAL LOCATIONS & POINTS OF INTEREST (POI) DATABASE ---
+const INITIAL_POIS = [
+  {
+    id: 'poi-1',
+    nameGeo: 'პრომეთეს მღვიმე',
+    nameEng: 'Prometheus Cave',
+    category: 'nature',
+    region: 'იმერეთი (Imereti)',
+    recommendedAge: ['primary', 'middle', 'high', 'adult'],
+    lat: 42.3768,
+    lng: 42.6009,
+    distanceFromTbilisi: 235,
+    descriptionGeo: 'მსოფლიო დონის ბუნების ძეგლი წყალტუბოში, 1.4 კმ საფეხმავლო ბილიკით, მიწისქვეშა მდინარეზე ნავით გასეირნებითა და ფერადი განათებებით.',
+    descriptionEng: 'World-class natural cave monument in Tskaltubo featuring a 1.4km walking trail, underground boat ride, and stunning stalactites.',
+    image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=80',
+    entryFee: '15 ₾ (მოსწავლე: 5.50 ₾)',
+    rating: 4.95,
+    reviewsCount: 128,
+    isPromoted: true,
+    activitiesGeo: ['ნავით გასეირნება', 'ლაზერული შოუ', 'გიდის მომსახურება'],
+    activitiesEng: ['Boat Ride', 'Laser Show', 'Guided Tour'],
+    reviews: [
+      { id: 'pr1', author: 'მარიამ კვარაცხელია (№53 სკოლა)', rating: 5, commentGeo: 'მე-6 კლასელები მყავდა წაყვანილი და ბავშვები აღფრთოვანებულები დარჩნენ ნავით სეირნობით!', commentEng: 'Took my 6th graders here and the kids were amazed by the boat tour!', date: '2026-05-12' },
+      { id: 'pr1-2', author: 'ლევან ბერიძე', rating: 5, commentGeo: 'იდეალურად მოწესრიგებული ინფრასტრუქტურა და უსაფრთხო ბილიკები.', commentEng: 'Perfectly organized infrastructure and safe walking paths.', date: '2026-04-28' }
+    ]
+  },
+  {
+    id: 'poi-2',
+    nameGeo: 'მწვანე მონასტერი (ჩითახევი)',
+    nameEng: 'Green Monastery (Chitakhevi)',
+    category: 'history',
+    region: 'სამცხე-ჯავახეთი (Samtskhe)',
+    recommendedAge: ['primary', 'middle', 'high', 'adult'],
+    lat: 41.7915,
+    lng: 43.3106,
+    distanceFromTbilisi: 165,
+    descriptionGeo: 'IX საუკუნის უძველესი სამონასტრო კომპლექსი ბორჯომის ხეობის ულამაზეს წიწვოვან ტყეში. იდეალურია ისტორიული შემეცნებისთვის.',
+    descriptionEng: '9th-century historic monastery complex nestled in the dense coniferous forest of Borjomi Gorge.',
+    image: 'https://images.unsplash.com/photo-1548625361-18545837ff29?auto=format&fit=crop&w=900&q=80',
+    entryFee: 'უფასო',
+    rating: 4.90,
+    reviewsCount: 84,
+    isPromoted: false,
+    activitiesGeo: ['ისტორიული ექსკურსია', 'ტყეში გასეირნება', 'ფოტოსესია'],
+    activitiesEng: ['Historical Tour', 'Forest Walk', 'Photography'],
+    reviews: [
+      { id: 'pr2', author: 'გიორგი მასწავლებელი', rating: 5, commentGeo: 'ძალიან წყნარი, სულიერი და ისტორიულად დატვირთული ადგილია გზად ბორჯომისკენ.', commentEng: 'Very peaceful and historically rich stop on the way to Borjomi.', date: '2026-04-15' }
+    ]
+  },
+  {
+    id: 'poi-3',
+    nameGeo: 'ლეილას ეკო-ეზო & საპიკნიკე ფაცხები',
+    nameEng: "Leila's Eco-Yard & Picnic Huts",
+    category: 'picnic',
+    region: 'იმერეთი (Imereti)',
+    recommendedAge: ['primary', 'middle', 'high'],
+    lat: 42.2500,
+    lng: 42.7000,
+    distanceFromTbilisi: 220,
+    descriptionGeo: 'სპეციალურად სასკოლო და ჯგუფური ექსკურსიებისთვის მოწყობილი დაცული ეზო: კეთილმოწყობილი ფაცხები, ხაჭაპურისა და ჩურჩხელის მასტერკლასები.',
+    descriptionEng: 'Safe, fenced eco-yard designed specifically for school groups: wooden picnic huts, Khachapuri & Churchkhela masterclasses, and outdoor games.',
+    image: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=900&q=80',
+    entryFee: '12 ₾ (მასტერკლასით: 25 ₾)',
+    rating: 4.98,
+    reviewsCount: 96,
+    isPromoted: true,
+    activitiesGeo: ['ხაჭაპურის ცხობა', 'ჩურჩხელის ამოვლება', 'საპიკნიკე ფაცხები', 'ეზოს თამაშები'],
+    activitiesEng: ['Khachapuri Baking', 'Churchkhela Making', 'Picnic Huts', 'Outdoor Games'],
+    reviews: [
+      { id: 'pr3', author: 'ნინო შარიქაძე', rating: 5, commentGeo: 'ხაჭაპურის გამოცხობა და ჩურჩხელის ამოვლება ბავშვებისთვის უდიდესი მხიარულება იყო! ეზო სრულიად დაცულია.', commentEng: 'Baking Khachapuri and making Churchkhela was the highlight of the trip! Fully fenced and safe yard.', date: '2026-05-02' }
+    ]
+  },
+  {
+    id: 'poi-4',
+    nameGeo: 'მარტვილის კანიონი',
+    nameEng: 'Martvili Canyon',
+    category: 'adventure',
+    region: 'სამეგრელო (Samegrelo)',
+    recommendedAge: ['middle', 'high', 'adult'],
+    lat: 42.4572,
+    lng: 42.3789,
+    distanceFromTbilisi: 280,
+    descriptionGeo: 'ზურმუხტისფერი მდინარე აბაშის კანიონი, კლდეებს შორის ნავებით ცურვა და ულამაზესი ჩანჩქერების კასკადი.',
+    descriptionEng: 'Emerald-green Abasha River canyon offering boat rides between cliffs and cascading waterfalls.',
+    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=900&q=80',
+    entryFee: '17 ₾ (მოსწავლე: 5.50 ₾)',
+    rating: 4.92,
+    reviewsCount: 210,
+    isPromoted: false,
+    activitiesGeo: ['ნავებით ცურვა', 'საფეხმავლო ხიდები', 'ჩანჩქერები'],
+    activitiesEng: ['Canyon Boating', 'Observation Bridges', 'Waterfalls'],
+    reviews: [
+      { id: 'pr4', author: 'დავით გოგოლაძე', rating: 5, commentGeo: 'უფროსკლასელებისთვის საუკეთესო თავგადასავალია.', commentEng: 'Best adventure destination for high school students.', date: '2026-05-10' }
+    ]
+  },
+  {
+    id: 'poi-5',
+    nameGeo: 'შიომღვიმის მონასტერი & საპიკნიკე ველი',
+    nameEng: 'Shiomghvime Monastery & Picnic Meadow',
+    category: 'history',
+    region: 'მცხეთა-მთიანეთი (Mtskheta)',
+    recommendedAge: ['primary', 'middle', 'high', 'adult'],
+    lat: 41.8622,
+    lng: 44.6408,
+    distanceFromTbilisi: 38,
+    descriptionGeo: 'თბილისთან ძალიან ახლოს მდებარე VI საუკუნის კლდეში ნაკვეთი სამონასტრო კომპლექსი, მიმდებარე ფართო საპიკნიკე სივრცეებით.',
+    descriptionEng: '6th-century rock-hewn monastic complex very close to Tbilisi, surrounded by spacious picnic meadows.',
+    image: 'https://images.unsplash.com/photo-1565008576549-57569a49371d?auto=format&fit=crop&w=900&q=80',
+    entryFee: 'უფასო',
+    rating: 4.85,
+    reviewsCount: 154,
+    isPromoted: false,
+    activitiesGeo: ['ისტორიული ძეგლი', 'პიკნიკი ბუნებაში', 'მოკლე ლაშქრობა'],
+    activitiesEng: ['Historic Monument', 'Nature Picnic', 'Short Hike'],
+    reviews: []
+  },
+  {
+    id: 'poi-6',
+    nameGeo: 'სათავგადასავლო თოკების პარკი "ეკო-ტყე"',
+    nameEng: 'Eco-Forest Rope Adventure Park',
+    category: 'adventure',
+    region: 'კახეთი (Kakheti)',
+    recommendedAge: ['primary', 'middle', 'high', 'adult'],
+    lat: 41.9189,
+    lng: 45.4758,
+    distanceFromTbilisi: 95,
+    descriptionGeo: 'უსაფრთხოების სრული აღჭურვილობითა და ინსტრუქტორებით დაკომპლექტებული თოკების ქალაქი, ზიპლაინი და გუნდური თამაშები.',
+    descriptionEng: 'Fully equipped rope obstacle course with certified instructors, zipline, and team-building games.',
+    image: 'https://images.unsplash.com/photo-1533587851505-d119e13fa0d7?auto=format&fit=crop&w=900&q=80',
+    entryFee: '20 ₾ (ჯგუფური ფასდაკლება)',
+    rating: 4.94,
+    reviewsCount: 67,
+    isPromoted: true,
+    activitiesGeo: ['ზიპლაინი', 'თოკების დაბრკოლებები', 'ინსტრუქტორის მეთვალყურეობა'],
+    activitiesEng: ['Zipline', 'Rope Courses', 'Instructor Supervision'],
+    reviews: []
+  }
+];
+
+// --- INITIAL TRANSPORT & DRIVERS MARKETPLACE DATABASE ---
+const INITIAL_TRANSPORT = [
+  {
+    id: 'tr-1',
+    driverNameGeo: 'გიორგი ბერიძე',
+    driverNameEng: 'Giorgi Beridze',
+    phone: '599 12 34 56',
+    experienceYears: 14,
+    vehicleModel: 'Mercedes-Benz Sprinter (VIP Tourist)',
+    vehicleType: 'minibus',
+    capacity: 20,
+    year: 2020,
+    ac: true,
+    mic: true,
+    wifi: true,
+    rating: 4.98,
+    reviewsCount: 48,
+    tripsCompleted: 185,
+    pricePerDay: 450,
+    verified: true,
+    isPromoted: true,
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=900&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=900&q=80'
+    ],
+    tagsGeo: ['რბილი სავარძლები', 'ძლიერი კონდიციონერი', 'გიდის მიკროფონი', 'დიდი საბარგული'],
+    tagsEng: ['Reclining Comfort Seats', 'Dual AC', 'Guide Microphone', 'Large Luggage Bay'],
+    reviews: [
+      { id: 'r1', author: 'ნინო (№53 საჯარო სკოლა)', rating: 5, commentGeo: 'ძალიან ყურადღებიანი და გამოცდილი მძღოლია. ბავშვებს მშვიდად და უსაფრთხოდ ემსახურა მთელი დღე.', commentEng: 'Very attentive and experienced driver. Served the children safely all day.', date: '2026-05-10' },
+      { id: 'r2', author: 'დავითი', rating: 5, commentGeo: 'სპრინტერი იყო იდეალურად სუფთა, კონდიციონერიც შესანიშნავად მუშაობდა.', commentEng: 'The Sprinter was spotless and the AC worked great.', date: '2026-04-22' }
+    ]
+  },
+  {
+    id: 'tr-2',
+    driverNameGeo: 'დავით კაპანაძე',
+    driverNameEng: 'Davit Kapanadze',
+    phone: '595 88 77 66',
+    experienceYears: 18,
+    vehicleModel: 'Setra S 415 GT-HD Grand Bus',
+    vehicleType: 'bus',
+    capacity: 53,
+    year: 2019,
+    ac: true,
+    mic: true,
+    wifi: true,
+    rating: 4.95,
+    reviewsCount: 36,
+    tripsCompleted: 140,
+    pricePerDay: 850,
+    verified: true,
+    isPromoted: true,
+    image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=900&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=900&q=80'
+    ],
+    tagsGeo: ['53 ადგილი', 'მაცივარი', '2 მონიტორი', 'მიკროფონი', 'უსაფრთხოების ღვედები'],
+    tagsEng: ['53 Seats', 'Refrigerator', '2 TV Screens', 'Microphone', 'Seatbelts on all seats'],
+    reviews: [
+      { id: 'r3', author: 'თამარ მასწავლებელი', rating: 5, commentGeo: 'ორი პარალელური კლასი წავედით კახეთში. უმაღლესი კომფორტი და პუნქტუალურობა!', commentEng: 'Two classes traveled together to Kakheti. Top comfort and punctuality!', date: '2026-05-01' }
+    ]
+  },
+  {
+    id: 'tr-3',
+    driverNameGeo: 'ზურაბ გელაშვილი',
+    driverNameEng: 'Zurab Gelashvili',
+    phone: '577 33 22 11',
+    experienceYears: 9,
+    vehicleModel: 'Ford Transit Custom Tourneo',
+    vehicleType: 'minibus',
+    capacity: 15,
+    year: 2022,
+    ac: true,
+    mic: false,
+    wifi: true,
+    rating: 4.88,
+    reviewsCount: 22,
+    tripsCompleted: 78,
+    pricePerDay: 360,
+    verified: true,
+    isPromoted: false,
+    image: 'https://images.unsplash.com/photo-1557223562-6c77ef16210f?auto=format&fit=crop&w=900&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1557223562-6c77ef16210f?auto=format&fit=crop&w=900&q=80'
+    ],
+    tagsGeo: ['ეკონომიური', 'სუფთა სალონი', 'ახალი მოდელი (2022)', 'კონდიციონერი'],
+    tagsEng: ['Fuel Efficient', 'Clean Interior', 'New 2022 Model', 'Air Conditioning'],
+    reviews: [
+      { id: 'r4', author: 'გიორგი მ.', rating: 5, commentGeo: 'დროულად მოვიდა სკოლასთან, ძალიან კომფორტული მანქანაა მცირე ჯგუფისთვის.', commentEng: 'Arrived right on time at the school, very comfortable for a small group.', date: '2026-03-19' }
+    ]
+  },
+  {
+    id: 'tr-4',
+    driverNameGeo: 'მამუკა ლომიძე',
+    driverNameEng: 'Mamuka Lomidze',
+    phone: '555 44 11 99',
+    experienceYears: 11,
+    vehicleModel: 'Mercedes-Benz Tourismo (32 ადგილი)',
+    vehicleType: 'bus',
+    capacity: 32,
+    year: 2018,
+    ac: true,
+    mic: true,
+    wifi: false,
+    rating: 4.91,
+    reviewsCount: 29,
+    tripsCompleted: 112,
+    pricePerDay: 620,
+    verified: true,
+    isPromoted: false,
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=900&q=80',
+    gallery: [],
+    tagsGeo: ['ოპტიმალური ზომა (32 ადგილი)', 'კონდიციონერი', 'მიკროფონი'],
+    tagsEng: ['Optimal 32 Seats', 'Air Conditioning', 'Microphone'],
+    reviews: []
+  }
+];
+
+// --- BILINGUAL DICTIONARY (KA / EN) ---
+const TRANSLATIONS = {
+  ka: {
+    tagline: 'ექსკურსიები & ტურები',
+    navPlanner: 'მარშრუტის დაგეგმვა',
+    navLocations: 'ლოკაციები & ეკო-ეზოები',
+    navTransport: 'ტრანსპორტი & მძღოლები',
+    navAi: 'Xkursia AI',
+    addListingBtn: 'დაამატე ლოკაცია / მანქანა',
+    badgeText: 'საქართველოს #1 სასკოლო და ტურისტული პლატფორმა',
+    heroTitle: 'დააგეგმეთ იდეალური ექსკურსია წამებში',
+    heroDesc: 'მიუთითეთ საიდან სად მიდიხართ, მონიშნეთ ასაკობრივი ჯგუფი და ჩვენ ავტომატურად გიპოვით გზად არსებულ ყველა საპიკნიკე ადგილს, ეკო-ქოხს, ისტორიულ ძეგლსა და გადამოწმებულ მძღოლს!',
+    labelOrigin: 'საწყისი წერტილი (ქალაქი / სკოლა)',
+    placeholderOrigin: 'მაგ. თბილისი, №53 სკოლა',
+    labelDestination: 'დანიშნულების ადგილი',
+    placeholderDest: 'მაგ. პრომეთეს მღვიმე',
+    labelAgeGroup: 'ასაკობრივი ჯგუფი',
+    allAges: 'ყველა ასაკი',
+    primaryAge: 'I-IV კლასი (6-10 წ.)',
+    middleAge: 'V-VIII კლასი (10-14 წ.)',
+    highAge: 'IX-XII კლასი (14-18 წ.)',
+    adultsAge: 'ზრდასრულთა ტური (18+)',
+    labelCategory: 'კატეგორია',
+    catAll: 'ყველა ტიპის ლოკაცია',
+    catNature: 'ბუნება & ნაკრძალები',
+    catHistory: 'ისტორია & ეკლესიები',
+    catPicnic: 'საპიკნიკე & ეკო-ქოხები',
+    catAdventure: 'სათავგადასავლო პარკები',
+    statDistance: 'სავარაუდო მანძილი (ორივე გზა)',
+    statDriveTime: 'მგზავრობის დრო',
+    statTransportCost: 'ტრანსპორტის ბიუჯეტი',
+    locationsAlongRoute: 'რეკომენდებული ლოკაციები მარშრუტზე',
+    selectedCount: 'არჩეულია',
+    hours: 'საათი',
+    ecoZone: '🌿 სერტიფიცირებული ლოკაცია',
+    removeBtn: 'ამოშლა',
+    addToTripBtn: 'მარშრუტში დამატება',
+    interactiveMapTitle: 'ინტერაქციული მარშრუტის რუკა',
+    mapCorridorLabel: 'აქტიური მარშრუტის კორიდორი (Xkursia Geo-Map)',
+    selectedPoiSummary: 'თქვენი მარშრუტი',
+    selectTransportBtn: 'ტრანსპორტის შერჩევა →',
+    locationsHeading: 'საქართველოს საექსკურსიო ლოკაციები & ეკო-ეზოები',
+    locationsSubheading: 'აღმოაჩინეთ გადამოწმებული ეკო-ქოხები, ფაცხები, მუზეუმები და ბუნების ძეგლები ასაკობრივი რეკომენდაციებით',
+    entryFeeLabel: 'შესვლის ღირებულება',
+    detailsBtn: 'დეტალები & რივიუები',
+    transportHeading: 'სამარშრუტო ტაქსები & ტურისტული ავტობუსები',
+    transportSubheading: 'იპოვეთ სასურველი ტევადობის ტრანსპორტი შუამავლების გარეშე. ფასები განისაზღვრება მანქანის ზომითა და კომფორტით.',
+    verifiedBadge: 'გადამოწმებული ავტოპარკი',
+    safetyGuarantee: '100% უსაფრთხოების სტანდარტი',
+    safetySub: 'ტექდათვალიერება გავლილი ტრანსპორტი & გამოცდილი მძღოლები',
+    seatsLabel: 'ადგილი',
+    driverLabel: 'მძღოლი',
+    tripsCount: 'წარმატებული რეისი',
+    dailyRate: 'დღიური ტარიფი',
+    bookBtn: 'დაჯავშნა',
+    viewDriverBtn: 'ფოტოები & რივიუები',
+    reviewsTitle: 'მომხმარებელთა შეფასებები',
+    writeReviewBtn: 'შეფასების დატოვება',
+    yourRating: 'თქვენი შეფასება (1-5):',
+    yourReviewPlaceholder: 'გაუზიარეთ სხვებს თქვენი შთაბეჭდილება...',
+    submitReview: 'გამოქვეყნება',
+    experienceLabel: 'მართვის სტაჟი',
+    years: 'წელი',
+    driverDetailsTitle: 'მძღოლისა და ტრანსპორტის პროფილი',
+    aiTitle: 'Xkursia AI გზამკვლევი',
+    aiStatus: 'ონლაინ • პასუხობს მყისიერად',
+    aiPrompt1: '💡 5 კლასი მცხეთაში',
+    aiPrompt2: '💡 ტრანსპორტის ფასები',
+    aiPrompt3: '💡 სად გავაკეთოთ პიკნიკი?',
+    aiInputPlaceholder: 'დაუსვით კითხვა Xkursia AI-ს...',
+    bookingTitle: 'ტრანსპორტის ონლაინ ჯავშანი',
+    bookingSuccess: 'ჯავშნის მოთხოვნა მიღებულია!',
+    bookingSuccessSub: 'მძღოლი დაგიკავშირდებათ მითითებულ ნომერზე 15 წუთის განმავლობაში დეტალების დასაზუსტებლად.',
+    inputName: 'სახელი და გვარი (მასწავლებელი / ორგანიზატორი)',
+    inputNamePlaceholder: 'მაგ. ნინო კაპანაძე',
+    inputPhone: 'საკონტაქტო ტელეფონი',
+    inputDate: 'ექსკურსიის თარიღი',
+    inputPassengers: 'მგზავრების სავარაუდო რაოდენობა',
+    submitBookingBtn: 'ჯავშნის დადასტურება',
+    footerRights: '— საქართველოს ექსკურსიებისა და ტურების ერთიანი პლატფორმა © 2026',
+    terms: 'წესები & პირობები',
+    driverReg: 'ბიზნესის / მძღოლის რეგისტრაცია',
+    contact: 'კონტაქტი',
+    originText: 'გასვლა',
+    destText: 'დანიშნულება',
+    filterCapacityAll: 'ყველა ტევადობა',
+    filterCapacitySmall: 'მინივენი / სპრინტერი (15-20 ადგილი)',
+    filterCapacityLarge: 'ავტობუსი (30-55 ადგილი)',
+    addModalTitle: 'ახალი ლოკაციის ან ტრანსპორტის დამატება (B2B)',
+    addModalSub: 'განათავსეთ თქვენი ეკო-ეზო, კვების ობიექტი ან ტრანსპორტი Xkursia.ge-ზე და მიიღეთ ჯავშნები მთელი საქართველოდან.'
+  },
+  en: {
+    tagline: 'Excursions & Tours',
+    navPlanner: 'Route Planner',
+    navLocations: 'Locations & Eco-Yards',
+    navTransport: 'Transport & Drivers',
+    navAi: 'Xkursia AI',
+    addListingBtn: 'Add Location / Vehicle',
+    badgeText: "#1 Georgia's School & Group Trip Platform",
+    heroTitle: 'Plan the Perfect Excursion in Seconds',
+    heroDesc: 'Enter your origin and destination, select age group, and our smart system will automatically map all scenic picnic spots, eco-huts, historic landmarks, and verified drivers along your route!',
+    labelOrigin: 'Origin Point (City / School)',
+    placeholderOrigin: 'e.g., Tbilisi, Public School #53',
+    labelDestination: 'Destination Point',
+    placeholderDest: 'e.g., Prometheus Cave',
+    labelAgeGroup: 'Age Group / Grade',
+    allAges: 'All Ages',
+    primaryAge: 'Grades 1-4 (Ages 6-10)',
+    middleAge: 'Grades 5-8 (Ages 10-14)',
+    highAge: 'Grades 9-12 (Ages 14-18)',
+    adultsAge: 'Adult Tours (18+)',
+    labelCategory: 'Category',
+    catAll: 'All Location Types',
+    catNature: 'Nature & Reserves',
+    catHistory: 'History & Monasteries',
+    catPicnic: 'Picnic & Eco-Huts',
+    catAdventure: 'Adventure Parks',
+    statDistance: 'Est. Round-Trip Distance',
+    statDriveTime: 'Driving Duration',
+    statTransportCost: 'Est. Transport Budget',
+    locationsAlongRoute: 'Recommended Locations Along Route',
+    selectedCount: 'Selected',
+    hours: 'hours',
+    ecoZone: '🌿 Verified Venue',
+    removeBtn: 'Remove',
+    addToTripBtn: 'Add to Route',
+    interactiveMapTitle: 'Interactive Route Corridor Map',
+    mapCorridorLabel: 'Active Route Corridor (Xkursia Geo-Map)',
+    selectedPoiSummary: 'Your Itinerary',
+    selectTransportBtn: 'Choose Transport →',
+    locationsHeading: 'Excursion Locations & Eco-Yards in Georgia',
+    locationsSubheading: 'Explore verified eco-huts, picnic yards, museums, and natural monuments tailored by age group',
+    entryFeeLabel: 'Entry Fee',
+    detailsBtn: 'Details & Reviews',
+    transportHeading: 'Minibuses & Tourist Coaches',
+    transportSubheading: 'Book verified transport directly from drivers without middlemen. Transparent pricing by capacity and comfort.',
+    verifiedBadge: 'Verified Fleet',
+    safetyGuarantee: '100% Safety Standard',
+    safetySub: 'Inspected vehicles & experienced drivers',
+    seatsLabel: 'Seats',
+    driverLabel: 'Driver',
+    tripsCount: 'completed trips',
+    dailyRate: 'Daily Rate',
+    bookBtn: 'Book Now',
+    viewDriverBtn: 'Photos & Reviews',
+    reviewsTitle: 'User Ratings & Reviews',
+    writeReviewBtn: 'Write a Review',
+    yourRating: 'Your Rating (1-5):',
+    yourReviewPlaceholder: 'Share your experience with others...',
+    submitReview: 'Publish Review',
+    experienceLabel: 'Driving Experience',
+    years: 'years',
+    driverDetailsTitle: 'Driver & Vehicle Profile',
+    aiTitle: 'Xkursia AI Guide',
+    aiStatus: 'Online • Instant Replies',
+    aiPrompt1: '💡 Grade 5 trip to Mtskheta',
+    aiPrompt2: '💡 Transport rental prices',
+    aiPrompt3: '💡 Best picnic spots?',
+    aiInputPlaceholder: 'Ask Xkursia AI anything...',
+    bookingTitle: 'Online Transport Reservation',
+    bookingSuccess: 'Booking Request Received!',
+    bookingSuccessSub: 'The driver will contact you at your phone number within 15 minutes to confirm details.',
+    inputName: 'Full Name (Teacher / Organizer)',
+    inputNamePlaceholder: 'e.g., Nino Kapanadze',
+    inputPhone: 'Contact Phone Number',
+    inputDate: 'Excursion Date',
+    inputPassengers: 'Estimated Passengers',
+    submitBookingBtn: 'Confirm Reservation',
+    footerRights: '— Unified Excursion & Tour Platform of Georgia © 2026',
+    terms: 'Terms & Conditions',
+    driverReg: 'Business / Driver Registration',
+    contact: 'Contact',
+    originText: 'Origin',
+    destText: 'Destination',
+    filterCapacityAll: 'All Capacities',
+    filterCapacitySmall: 'Minibus / Sprinter (15-20 seats)',
+    filterCapacityLarge: 'Tourist Bus (30-55 seats)',
+    addModalTitle: 'Add Your Location or Vehicle (B2B)',
+    addModalSub: 'List your eco-yard, restaurant, or transport vehicle on Xkursia.ge and receive group bookings across Georgia.'
+  }
+};
+
+export default function App() {
+  // Language & Navigation State
+  const [lang, setLang] = useState('ka');
+  const t = TRANSLATIONS[lang];
+  const [activeTab, setActiveTab] = useState('planner');
+
+  // Dynamic Data States (Allows adding new listings and reviews in real-time)
+  const [pois, setPois] = useState(INITIAL_POIS);
+  const [transports, setTransports] = useState(INITIAL_TRANSPORT);
+
+  // Route Planner Filters
+  const [origin, setOrigin] = useState('თბილისი, №53 სკოლა');
+  const [destination, setDestination] = useState('პრომეთეს მღვიმე');
+  const [ageGroup, setAgeGroup] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [selectedPoiIds, setSelectedPoiIds] = useState(['poi-1', 'poi-3']);
+
+  // Transport Filters
+  const [capacityFilter, setCapacityFilter] = useState('all');
+
+  // Modals State
+  const [bookingVehicle, setBookingVehicle] = useState(null);
+  const [bookingSubmitted, setBookingSubmitted] = useState(false);
+  const [selectedDriverModal, setSelectedDriverModal] = useState(null);
+  const [selectedPoiModal, setSelectedPoiModal] = useState(null);
+  const [showAddB2BModal, setShowAddB2BModal] = useState(false);
+  const [b2bSubmitted, setB2bSubmitted] = useState(false);
+
+  // Review Form State
+  const [userRatingInput, setUserRatingInput] = useState(5);
+  const [userCommentInput, setUserCommentInput] = useState('');
+  const [showReviewForm, setShowReviewForm] = useState(false);
+
+  // AI Chatbot State
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiInput, setAiInput] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    {
+      sender: 'ai',
+      text: 'გამარჯობა! მე ვარ Xkursia AI გზამკვლევი. მომწერეთ რომელი ქალაქიდან გადიხართ და რა ასაკის ჯგუფი გყავთ — მე შეგირჩევთ საუკეთესო მარშრუტს, საპიკნიკე ეზოსა და ტრანსპორტს!'
+    }
+  ]);
+
+  // Filtered POIs based on Age & Category
+  const filteredPois = useMemo(() => {
+    return pois.filter((poi) => {
+      const matchesAge = ageGroup === 'all' || poi.recommendedAge.includes(ageGroup);
+      const matchesCat = categoryFilter === 'all' || poi.category === categoryFilter;
+      return matchesAge && matchesCat;
+    });
+  }, [pois, ageGroup, categoryFilter]);
+
+  // Filtered Transports based on Capacity
+  const filteredTransports = useMemo(() => {
+    return transports.filter((tr) => {
+      if (capacityFilter === 'small') return tr.capacity <= 22;
+      if (capacityFilter === 'large') return tr.capacity > 22;
+      return true;
+    });
+  }, [transports, capacityFilter]);
+
+  // Dynamic Distance Calculation Simulation
+  const estimatedDistance = useMemo(() => {
+    const selectedItems = pois.filter((p) => selectedPoiIds.includes(p.id));
+    if (selectedItems.length === 0) return 140;
+    const maxDist = Math.max(...selectedItems.map((p) => p.distanceFromTbilisi));
+    return maxDist * 2 + selectedItems.length * 12;
+  }, [pois, selectedPoiIds]);
+
+  const togglePoiSelection = (poiId) => {
+    setSelectedPoiIds((prev) =>
+      prev.includes(poiId) ? prev.filter((id) => id !== poiId) : [...prev, poiId]
+    );
+  };
+
+  // Add 5-Star Review Handler (Supports both Vehicles and POIs)
+  const handleAddReview = (targetId, type) => {
+    if (!userCommentInput.trim()) return;
+
+    const newReview = {
+      id: 'rev-' + Date.now(),
+      author: lang === 'ka' ? 'დამოწმებული მომხმარებელი' : 'Verified Organizer',
+      rating: userRatingInput,
+      commentGeo: userCommentInput,
+      commentEng: userCommentInput,
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    if (type === 'vehicle') {
+      setTransports((prev) =>
+        prev.map((tr) => {
+          if (tr.id === targetId) {
+            const updatedReviews = [newReview, ...tr.reviews];
+            const newAvg = (
+              (tr.rating * tr.reviewsCount + userRatingInput) /
+              (tr.reviewsCount + 1)
+            ).toFixed(2);
+            const updatedObj = {
+              ...tr,
+              reviews: updatedReviews,
+              reviewsCount: tr.reviewsCount + 1,
+              rating: Number(newAvg)
+            };
+            setSelectedDriverModal(updatedObj);
+            return updatedObj;
+          }
+          return tr;
+        })
+      );
+    } else if (type === 'poi') {
+      setPois((prev) =>
+        prev.map((poi) => {
+          if (poi.id === targetId) {
+            const updatedReviews = [newReview, ...poi.reviews];
+            const newAvg = (
+              (poi.rating * poi.reviewsCount + userRatingInput) /
+              (poi.reviewsCount + 1)
+            ).toFixed(2);
+            const updatedObj = {
+              ...poi,
+              reviews: updatedReviews,
+              reviewsCount: poi.reviewsCount + 1,
+              rating: Number(newAvg)
+            };
+            setSelectedPoiModal(updatedObj);
+            return updatedObj;
+          }
+          return poi;
+        })
+      );
+    }
+
+    setUserCommentInput('');
+    setUserRatingInput(5);
+    setShowReviewForm(false);
+  };
+
+  // AI Assistant Intelligent Response Logic
+  const handleSendMessage = (customPrompt) => {
+    const text = customPrompt || aiInput;
+    if (!text.trim()) return;
+
+    setChatMessages((prev) => [...prev, { sender: 'user', text }]);
+    setAiInput('');
+
+    setTimeout(() => {
+      const lower = text.toLowerCase();
+      let reply = '';
+
+      if (lower.includes('მცხეთა') || lower.includes('mtskheta') || lower.includes('5')) {
+        reply =
+          lang === 'ka'
+            ? 'V კლასისთვის მცხეთის მიმართულებით იდეალური მარშრუტია:\n1. ჯვრის მონასტერი\n2. შიომღვიმე\n3. სადილი და თამაშები "ლეილას ეკო-ეზოში".\nტრანსპორტისთვის გირჩევთ 20-ადგილიან სპრინტერს (360-450 ₾).'
+            : 'Ideal Grade 5 itinerary near Mtskheta:\n1. Jvari Monastery\n2. Shiomghvime\n3. Lunch & games at Eco-Yard.\nWe recommend a 20-seat Sprinter (360-450 GEL).';
+      } else if (lower.includes('ფას') || lower.includes('price') || lower.includes('ტრანსპორტ')) {
+        reply =
+          lang === 'ka'
+            ? 'Xkursia.ge-ზე ტრანსპორტის ფასები პირდაპირ მძღოლებისგანაა:\n• 15-20 ადგილიანი სპრინტერი: 360 - 450 ₾\n• 32 ადგილიანი ავტობუსი: 620 ₾\n• 53 ადგილიანი გრანდ ავტობუსი: 850 ₾.'
+            : 'Direct driver rates on Xkursia.ge:\n• 15-20 seat Sprinter: 360-450 GEL\n• 32-seat Bus: 620 GEL\n• 53-seat Grand Bus: 850 GEL.';
+      } else if (lower.includes('პიკნიკ') || lower.includes('picnic') || lower.includes('ეზო')) {
+        reply =
+          lang === 'ka'
+            ? 'საპიკნიკედ და მასტერკლასებისთვის გირჩევთ "ლეილას ეკო-ეზოს" (ხაჭაპურის ცხობა და ფაცხები) ან "ეკო-ტყის" თოკების პარკს კახეთში. ორივე ლოკაცია სრულად დაცულია ბავშვებისთვის!'
+            : 'For picnics and masterclasses, check out "Leila\'s Eco-Yard" (Khachapuri baking & huts) or "Eco-Forest" Rope Park. Both are fenced and safe for children!';
+      } else {
+        reply =
+          lang === 'ka'
+            ? `შესანიშნავი არჩევანია! "${destination}"-ის მიმართულებით უკვე მონიშნული გაქვთ ${selectedPoiIds.length} ლოკაცია. შეგიძლიათ გადახვიდეთ "ტრანსპორტი & მძღოლები" განყოფილებაში და დაჯავშნოთ გადამოწმებული ავტობუსი.`
+            : `Great choice! Towards "${destination}", you have ${selectedPoiIds.length} stops selected. Head over to the "Transport & Drivers" tab to reserve a verified bus.`;
+      }
+
+      setChatMessages((prev) => [...prev, { sender: 'ai', text: reply }]);
+    }, 500);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
+      {/* ===================================================================== */}
+      {/* HEADER & TOP NAVIGATION                                               */}
+      {/* ===================================================================== */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            {/* Brand Logo */}
+            <div
+              onClick={() => setActiveTab('planner')}
+              className="flex items-center gap-3 cursor-pointer group"
+            >
+              <div className="w-11 h-11 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-600/25 group-hover:scale-105 transition">
+                <Compass className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <span className="text-2xl font-black tracking-tight text-slate-900">
+                  Xkursia<span className="text-emerald-600">.ge</span>
+                </span>
+                <span className="text-[10px] block font-bold text-slate-400 uppercase tracking-widest">
+                  {t.tagline}
+                </span>
+              </div>
+            </div>
+
+            {/* Main Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80">
+              <button
+                onClick={() => setActiveTab('planner')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  activeTab === 'planner'
+                    ? 'bg-white text-emerald-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {t.navPlanner}
+              </button>
+              <button
+                onClick={() => setActiveTab('locations')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  activeTab === 'locations'
+                    ? 'bg-white text-emerald-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {t.navLocations}
+              </button>
+              <button
+                onClick={() => setActiveTab('transport')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  activeTab === 'transport'
+                    ? 'bg-white text-emerald-700 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {t.navTransport}
+              </button>
+            </nav>
+
+            {/* Right Controls: Language Switcher + B2B Add Button */}
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => setLang((prev) => (prev === 'ka' ? 'en' : 'ka'))}
+                className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold rounded-xl transition border border-slate-200"
+                title="Change Language"
+              >
+                <Globe className="w-4 h-4 text-emerald-600" />
+                <span>{lang === 'ka' ? 'EN' : 'KA'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setB2bSubmitted(false);
+                  setShowAddB2BModal(true);
+                }}
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-md shadow-emerald-600/20"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">{t.addListingBtn}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation Bar */}
+          <div className="flex md:hidden pb-3 gap-1 overflow-x-auto">
+            {['planner', 'locations', 'transport'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+                  activeTab === tab
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                {tab === 'planner' && t.navPlanner}
+                {tab === 'locations' && t.navLocations}
+                {tab === 'transport' && t.navTransport}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* ===================================================================== */}
+      {/* VIEW 1: INTERACTIVE ROUTE PLANNER & CORRIDOR MAP                      */}
+      {/* ===================================================================== */}
+      {activeTab === 'planner' && (
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          {/* Hero Section & Smart Filter Bar */}
+          <section className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden">
+            <div className="absolute -right-20 -top-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 max-w-3xl space-y-4">
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-bold border border-emerald-400/30">
+                <Sparkles className="w-4 h-4" /> {t.badgeText}
+              </span>
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+                {t.heroTitle}
+              </h1>
+              <p className="text-emerald-100/85 text-sm sm:text-base leading-relaxed">
+                {t.heroDesc}
+              </p>
+            </div>
+
+            {/* Search Inputs Grid */}
+            <div className="mt-8 bg-white rounded-2xl p-4 sm:p-6 text-slate-800 shadow-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  {t.labelOrigin}
+                </label>
+                <div className="relative">
+                  <MapPin className="w-4 h-4 text-emerald-600 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    placeholder={t.placeholderOrigin}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  {t.labelDestination}
+                </label>
+                <div className="relative">
+                  <Navigation className="w-4 h-4 text-amber-500 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    placeholder={t.placeholderDest}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  {t.labelAgeGroup}
+                </label>
+                <select
+                  value={ageGroup}
+                  onChange={(e) => setAgeGroup(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="all">{t.allAges}</option>
+                  <option value="primary">{t.primaryAge}</option>
+                  <option value="middle">{t.middleAge}</option>
+                  <option value="high">{t.highAge}</option>
+                  <option value="adult">{t.adultsAge}</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  {t.labelCategory}
+                </label>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="all">{t.catAll}</option>
+                  <option value="nature">{t.catNature}</option>
+                  <option value="history">{t.catHistory}</option>
+                  <option value="picnic">{t.catPicnic}</option>
+                  <option value="adventure">{t.catAdventure}</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          {/* Route Telemetry Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center gap-4 shadow-sm">
+              <div className="p-3.5 bg-emerald-50 text-emerald-600 rounded-2xl">
+                <Navigation className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-400 block">{t.statDistance}</span>
+                <span className="text-xl font-black text-slate-900">~{estimatedDistance} კმ</span>
+              </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center gap-4 shadow-sm">
+              <div className="p-3.5 bg-amber-50 text-amber-600 rounded-2xl">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-400 block">{t.statDriveTime}</span>
+                <span className="text-xl font-black text-slate-900">
+                  {(estimatedDistance / 68).toFixed(1)} {t.hours}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center gap-4 shadow-sm">
+              <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl">
+                <Bus className="w-6 h-6" />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-slate-400 block">{t.statTransportCost}</span>
+                <span className="text-xl font-black text-slate-900">360 - 850 ₾</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Two-Column Interactive Planner Workspace */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Column: Filtered POIs Along the Route */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-black text-slate-900">
+                  {t.locationsAlongRoute} ({filteredPois.length})
+                </h2>
+                <span className="text-xs font-extrabold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+                  {selectedPoiIds.length} {t.selectedCount}
+                </span>
+              </div>
+
+              <div className="space-y-4 max-h-[620px] overflow-y-auto pr-1">
+                {filteredPois.map((poi) => {
+                  const isSelected = selectedPoiIds.includes(poi.id);
+                  const name = lang === 'ka' ? poi.nameGeo : poi.nameEng;
+                  const desc = lang === 'ka' ? poi.descriptionGeo : poi.descriptionEng;
+
+                  return (
+                    <div
+                      key={poi.id}
+                      className={`p-4 bg-white rounded-2xl border transition duration-200 space-y-3 ${
+                        isSelected
+                          ? 'border-emerald-500 ring-2 ring-emerald-500/15 shadow-md'
+                          : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3.5">
+                        <img
+                          src={poi.image}
+                          alt={name}
+                          onClick={() => setSelectedPoiModal(poi)}
+                          className="w-20 h-20 rounded-xl object-cover cursor-pointer hover:opacity-90 transition"
+                        />
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3
+                              onClick={() => setSelectedPoiModal(poi)}
+                              className="font-bold text-sm text-slate-900 hover:text-emerald-700 cursor-pointer"
+                            >
+                              {name}
+                            </h3>
+                            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">
+                              <Star className="w-3 h-3 fill-amber-400 stroke-amber-400" /> {poi.rating}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-bold text-slate-400 block">
+                            📍 {poi.region} • {poi.entryFee}
+                          </span>
+                          <p className="text-xs text-slate-500 line-clamp-2">{desc}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => setSelectedPoiModal(poi)}
+                          className="text-xs font-bold text-slate-500 hover:text-slate-800 underline"
+                        >
+                          {t.detailsBtn} ({poi.reviewsCount})
+                        </button>
+
+                        <button
+                          onClick={() => togglePoiSelection(poi.id)}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
+                            isSelected
+                              ? 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                              : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm'
+                          }`}
+                        >
+                          {isSelected ? (
+                            <>
+                              <X className="w-3.5 h-3.5" /> {t.removeBtn}
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5" /> {t.addToTripBtn}
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Column: Visual Geo-Corridor Map */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-black text-slate-900">{t.interactiveMapTitle}</h2>
+                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full">
+                  Xkursia Geo-Corridor Engine
+                </span>
+              </div>
+
+              <div className="bg-slate-900 rounded-3xl h-[580px] relative overflow-hidden shadow-xl border border-slate-800 flex flex-col justify-between p-6">
+                {/* Topographic Grid Overlay */}
+                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(#10b981_1.2px,transparent_1.2px)] [background-size:20px_20px]" />
+
+                {/* SVG Animated Route Polyline */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                  <path
+                    d="M 90 130 C 220 180, 310 340, 520 430"
+                    fill="none"
+                    stroke="#10b981"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    strokeDasharray="10 6"
+                  />
+                  <circle cx="90" cy="130" r="8" fill="#10b981" />
+                  <circle cx="520" cy="430" r="8" fill="#f59e0b" />
+                </svg>
+
+                {/* Status Header on Map */}
+                <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
+                  <div className="bg-slate-800/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-700 inline-flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
+                    <span className="text-xs font-bold text-white">{t.mapCorridorLabel}</span>
+                  </div>
+                </div>
+
+                {/* Origin & Destination Cards Floating on Map */}
+                <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 my-auto">
+                  <div className="bg-slate-800/90 border border-emerald-500/40 p-4 rounded-2xl text-white backdrop-blur-md shadow-lg">
+                    <span className="text-[11px] text-emerald-400 font-extrabold uppercase tracking-wider block">
+                      📍 {t.originText}
+                    </span>
+                    <p className="font-bold text-sm mt-0.5">{origin}</p>
+                  </div>
+
+                  <div className="bg-slate-800/90 border border-amber-500/40 p-4 rounded-2xl text-white backdrop-blur-md shadow-lg">
+                    <span className="text-[11px] text-amber-400 font-extrabold uppercase tracking-wider block">
+                      🏁 {t.destText}
+                    </span>
+                    <p className="font-bold text-sm mt-0.5">{destination}</p>
+                  </div>
+
+                  {/* Selected Stops Pills */}
+                  <div className="sm:col-span-2 bg-slate-800/80 border border-slate-700 p-3.5 rounded-2xl backdrop-blur-md">
+                    <span className="text-[11px] text-slate-400 font-bold block mb-2">
+                      {lang === 'ka' ? 'მარშრუტში ჩამატებული გაჩერებები:' : 'Selected Stops Along Route:'}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {pois
+                        .filter((p) => selectedPoiIds.includes(p.id))
+                        .map((stop, idx) => (
+                          <span
+                            key={stop.id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 rounded-full text-xs font-bold"
+                          >
+                            <span>{idx + 1}.</span>
+                            <span>{lang === 'ka' ? stop.nameGeo : stop.nameEng}</span>
+                          </span>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Action Strip */}
+                <div className="relative z-10 bg-white p-4 rounded-2xl shadow-xl flex items-center justify-between gap-4">
+                  <div>
+                    <span className="text-[11px] text-slate-400 font-bold uppercase block">
+                      {t.selectedPoiSummary}
+                    </span>
+                    <span className="text-sm font-black text-slate-900">
+                      {selectedPoiIds.length}{' '}
+                      {lang === 'ka' ? 'ლოკაცია • ~' : 'stops • ~'}
+                      {estimatedDistance} კმ
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveTab('transport')}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl text-xs font-extrabold transition shadow-lg shadow-emerald-600/25"
+                  >
+                    {t.selectTransportBtn}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* ===================================================================== */}
+      {/* VIEW 2: ALL LOCATIONS, ECO-HUTS & PICNIC YARDS CATALOG                */}
+      {/* ===================================================================== */}
+      {activeTab === 'locations' && (
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-black text-slate-900">{t.locationsHeading}</h1>
+              <p className="text-sm text-slate-500 max-w-2xl">{t.locationsSubheading}</p>
+            </div>
+
+            {/* Category Quick Filter Pills */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'all', label: t.catAll },
+                { id: 'picnic', label: t.catPicnic },
+                { id: 'nature', label: t.catNature },
+                { id: 'history', label: t.catHistory },
+                { id: 'adventure', label: t.catAdventure }
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategoryFilter(cat.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition ${
+                    categoryFilter === cat.id
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPois.map((poi) => {
+              const name = lang === 'ka' ? poi.nameGeo : poi.nameEng;
+              const desc = lang === 'ka' ? poi.descriptionGeo : poi.descriptionEng;
+              const activities = lang === 'ka' ? poi.activitiesGeo : poi.activitiesEng;
+
+              return (
+                <div
+                  key={poi.id}
+                  className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="relative h-52">
+                      <img src={poi.image} alt={name} className="w-full h-full object-cover" />
+                      {poi.isPromoted && (
+                        <span className="absolute top-3 left-3 bg-amber-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow">
+                          ★ TOP რეკომენდებული
+                        </span>
+                      )}
+                      <span className="absolute bottom-3 left-3 bg-slate-900/85 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        📍 {poi.region}
+                      </span>
+                    </div>
+
+                    <div className="p-5 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-extrabold text-lg text-slate-900 leading-snug">{name}</h3>
+                        <span className="flex items-center gap-1 text-xs font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full shrink-0">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 stroke-amber-400" /> {poi.rating} ({poi.reviewsCount})
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">{desc}</p>
+
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {activities.map((act, i) => (
+                          <span
+                            key={i}
+                            className="text-[11px] bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-md font-semibold"
+                          >
+                            {act}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-5 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                        {t.entryFeeLabel}
+                      </span>
+                      <span className="text-sm font-black text-slate-900">{poi.entryFee}</span>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedPoiModal(poi)}
+                      className="px-4 py-2.5 bg-slate-900 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition"
+                    >
+                      {t.detailsBtn}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </main>
+      )}
+
+      {/* ===================================================================== */}
+      {/* VIEW 3: VERIFIED TRANSPORT & DRIVERS MARKETPLACE                      */}
+      {/* ===================================================================== */}
+      {activeTab === 'transport' && (
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+          <div className="bg-gradient-to-r from-emerald-900 to-slate-900 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+            <div className="space-y-2">
+              <span className="px-3 py-1 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold rounded-full">
+                {t.verifiedBadge}
+              </span>
+              <h1 className="text-3xl font-black">{t.transportHeading}</h1>
+              <p className="text-emerald-100/85 text-sm max-w-xl">{t.transportSubheading}</p>
+            </div>
+
+            <div className="flex items-center gap-3.5 bg-white/10 p-4 rounded-2xl backdrop-blur border border-white/10">
+              <ShieldCheck className="w-10 h-10 text-emerald-400 shrink-0" />
+              <div className="text-xs">
+                <p className="font-extrabold text-white text-sm">{t.safetyGuarantee}</p>
+                <p className="text-emerald-200 mt-0.5">{t.safetySub}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Capacity Filter Bar */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: 'all', label: t.filterCapacityAll },
+              { id: 'small', label: t.filterCapacitySmall },
+              { id: 'large', label: t.filterCapacityLarge }
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setCapacityFilter(item.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  capacityFilter === item.id
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Vehicles Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTransports.map((tr) => {
+              const driverName = lang === 'ka' ? tr.driverNameGeo : tr.driverNameEng;
+              const tags = lang === 'ka' ? tr.tagsGeo : tr.tagsEng;
+
+              return (
+                <div
+                  key={tr.id}
+                  className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col"
+                >
+                  <div className="relative h-52">
+                    <img
+                      src={tr.image}
+                      alt={tr.vehicleModel}
+                      className="w-full h-full object-cover"
+                    />
+                    {tr.verified && (
+                      <span className="absolute top-3 left-3 bg-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow">
+                        <ShieldCheck className="w-3.5 h-3.5" />{' '}
+                        {lang === 'ka' ? 'გადამოწმებული' : 'Verified'}
+                      </span>
+                    )}
+                    <span className="absolute bottom-3 right-3 bg-slate-900/90 text-white px-3.5 py-1 rounded-full text-xs font-extrabold">
+                      {tr.capacity} {t.seatsLabel} • {tr.year} წ.
+                    </span>
+                  </div>
+
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-2.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-extrabold text-base text-slate-900">
+                          {tr.vehicleModel}
+                        </h3>
+                        <button
+                          onClick={() => setSelectedDriverModal(tr)}
+                          className="flex items-center gap-1 text-xs font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full hover:bg-amber-100 transition shrink-0"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-amber-400 stroke-amber-400" />{' '}
+                          {tr.rating} ({tr.reviewsCount})
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-slate-600 flex items-center gap-1.5 font-semibold">
+                        <Users className="w-4 h-4 text-emerald-600" />
+                        <span>
+                          {t.driverLabel}: {driverName} ({tr.tripsCompleted} {t.tripsCount})
+                        </span>
+                      </p>
+
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {tags.map((tag, i) => (
+                          <span
+                            key={i}
+                            className="text-[11px] bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-md font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <div>
+                        <span className="text-[11px] text-slate-400 font-bold block">
+                          {t.dailyRate}
+                        </span>
+                        <span className="text-xl font-black text-emerald-700">
+                          {tr.pricePerDay} ₾
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSelectedDriverModal(tr)}
+                          className="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition"
+                        >
+                          {t.viewDriverBtn}
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setBookingSubmitted(false);
+                            setBookingVehicle(tr);
+                          }}
+                          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition shadow-md shadow-emerald-600/20"
+                        >
+                          {t.bookBtn}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </main>
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL 1: DRIVER & VEHICLE PROFILE + 5-STAR REVIEWS                    */}
+      {/* ===================================================================== */}
+      {selectedDriverModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-100 shadow-2xl space-y-6 p-6 relative">
+            <button
+              onClick={() => {
+                setSelectedDriverModal(null);
+                setShowReviewForm(false);
+              }}
+              className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              <img
+                src={selectedDriverModal.image}
+                alt={selectedDriverModal.vehicleModel}
+                className="w-full sm:w-40 h-28 rounded-2xl object-cover"
+              />
+              <div className="space-y-1.5 flex-1">
+                <span className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">
+                  {t.driverDetailsTitle}
+                </span>
+                <h2 className="text-2xl font-black text-slate-900">
+                  {selectedDriverModal.vehicleModel}
+                </h2>
+                <p className="text-sm text-slate-700 font-bold">
+                  {t.driverLabel}:{' '}
+                  {lang === 'ka'
+                    ? selectedDriverModal.driverNameGeo
+                    : selectedDriverModal.driverNameEng}
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-semibold text-slate-500">
+                  <span className="bg-slate-100 px-2.5 py-1 rounded-lg text-slate-800">
+                    📞 {selectedDriverModal.phone}
+                  </span>
+                  <span>
+                    {t.experienceLabel}: {selectedDriverModal.experienceYears} {t.years}
+                  </span>
+                  <span>
+                    • {selectedDriverModal.capacity} {t.seatsLabel}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 5-Star Rating & Reviews Section */}
+            <div className="pt-4 border-t border-slate-100 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">{t.reviewsTitle}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-2xl font-black text-amber-500">
+                      {selectedDriverModal.rating}
+                    </span>
+                    <div className="flex text-amber-400">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= Math.round(selectedDriverModal.rating)
+                              ? 'fill-amber-400'
+                              : 'text-slate-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-slate-400 font-semibold">
+                      ({selectedDriverModal.reviewsCount})
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowReviewForm(!showReviewForm)}
+                  className="px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs rounded-xl transition"
+                >
+                  {t.writeReviewBtn}
+                </button>
+              </div>
+
+              {showReviewForm && (
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">
+                      {t.yourRating}
+                    </label>
+                    <div className="flex gap-1.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          onClick={() => setUserRatingInput(star)}
+                          className={`w-6 h-6 cursor-pointer transition ${
+                            star <= userRatingInput
+                              ? 'fill-amber-400 text-amber-400 scale-110'
+                              : 'text-slate-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <textarea
+                    rows={3}
+                    value={userCommentInput}
+                    onChange={(e) => setUserCommentInput(e.target.value)}
+                    placeholder={t.yourReviewPlaceholder}
+                    className="w-full bg-white p-3 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+
+                  <button
+                    onClick={() => handleAddReview(selectedDriverModal.id, 'vehicle')}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition"
+                  >
+                    {t.submitReview}
+                  </button>
+                </div>
+              )}
+
+              <div className="space-y-3 max-h-56 overflow-y-auto">
+                {selectedDriverModal.reviews.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic">
+                    {lang === 'ka' ? 'ჯერ შეფასებები არ არის.' : 'No reviews yet.'}
+                  </p>
+                ) : (
+                  selectedDriverModal.reviews.map((rev) => (
+                    <div
+                      key={rev.id}
+                      className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900">{rev.author}</span>
+                        <div className="flex text-amber-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3 h-3 ${
+                                i < rev.rating ? 'fill-amber-400' : 'text-slate-200'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-slate-600 leading-relaxed">
+                        {lang === 'ka' ? rev.commentGeo : rev.commentEng}
+                      </p>
+                      <span className="text-[10px] text-slate-400 block">{rev.date}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <div>
+                <span className="text-xs text-slate-400 font-bold block">{t.dailyRate}</span>
+                <span className="text-2xl font-black text-emerald-700">
+                  {selectedDriverModal.pricePerDay} ₾
+                </span>
+              </div>
+
+              <button
+                onClick={() => {
+                  const v = selectedDriverModal;
+                  setSelectedDriverModal(null);
+                  setBookingSubmitted(false);
+                  setBookingVehicle(v);
+                }}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-600/30"
+              >
+                {t.bookBtn}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL 2: LOCATION (POI) DETAILS + 5-STAR REVIEWS                      */}
+      {/* ===================================================================== */}
+      {selectedPoiModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-100 shadow-2xl space-y-6 p-6 relative">
+            <button
+              onClick={() => {
+                setSelectedPoiModal(null);
+                setShowReviewForm(false);
+              }}
+              className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <img
+              src={selectedPoiModal.image}
+              alt={selectedPoiModal.nameGeo}
+              className="w-full h-56 rounded-2xl object-cover"
+            />
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-extrabold text-emerald-600 uppercase">
+                  📍 {selectedPoiModal.region}
+                </span>
+                <span className="text-xs font-bold bg-slate-100 px-3 py-1 rounded-full">
+                  {selectedPoiModal.entryFee}
+                </span>
+              </div>
+              <h2 className="text-2xl font-black text-slate-900">
+                {lang === 'ka' ? selectedPoiModal.nameGeo : selectedPoiModal.nameEng}
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {lang === 'ka' ? selectedPoiModal.descriptionGeo : selectedPoiModal.descriptionEng}
+              </p>
+            </div>
+
+            {/* 5-Star Rating & Reviews for POI */}
+            <div className="pt-4 border-t border-slate-100 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-black text-amber-500">
+                    {selectedPoiModal.rating}
+                  </span>
+                  <div className="flex text-amber-400">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-4 h-4 ${
+                          star <= Math.round(selectedPoiModal.rating)
+                            ? 'fill-amber-400'
+                            : 'text-slate-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-slate-400">
+                    ({selectedPoiModal.reviewsCount})
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => setShowReviewForm(!showReviewForm)}
+                  className="px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs rounded-xl transition"
+                >
+                  {t.writeReviewBtn}
+                </button>
+              </div>
+
+              {showReviewForm && (
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                  <div className="flex gap-1.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        onClick={() => setUserRatingInput(star)}
+                        className={`w-6 h-6 cursor-pointer ${
+                          star <= userRatingInput
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-slate-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={userCommentInput}
+                    onChange={(e) => setUserCommentInput(e.target.value)}
+                    placeholder={t.yourReviewPlaceholder}
+                    className="w-full bg-white p-3 rounded-xl border border-slate-200 text-xs"
+                  />
+                  <button
+                    onClick={() => handleAddReview(selectedPoiModal.id, 'poi')}
+                    className="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl"
+                  >
+                    {t.submitReview}
+                  </button>
+                </div>
+              )}
+
+              <div className="space-y-2.5 max-h-48 overflow-y-auto">
+                {selectedPoiModal.reviews.map((rev) => (
+                  <div key={rev.id} className="p-3 bg-slate-50 rounded-xl text-xs space-y-1">
+                    <div className="flex justify-between font-bold">
+                      <span>{rev.author}</span>
+                      <span className="text-amber-500">★ {rev.rating}</span>
+                    </div>
+                    <p className="text-slate-600">
+                      {lang === 'ka' ? rev.commentGeo : rev.commentEng}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL 3: TRANSPORT BOOKING REQUEST FORM                               */}
+      {/* ===================================================================== */}
+      {bookingVehicle && (
+        <div className="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 border border-slate-100 shadow-2xl space-y-6 relative">
+            <button
+              onClick={() => {
+                setBookingVehicle(null);
+                setBookingSubmitted(false);
+              }}
+              className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {bookingSubmitted ? (
+              <div className="text-center py-6 space-y-4">
+                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                  <Check className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-slate-900">{t.bookingSuccess}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{t.bookingSuccessSub}</p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-1">
+                  <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-wider">
+                    {t.bookingTitle}
+                  </span>
+                  <h3 className="text-xl font-black text-slate-900">
+                    {bookingVehicle.vehicleModel}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-semibold">
+                    {t.driverLabel}:{' '}
+                    {lang === 'ka'
+                      ? bookingVehicle.driverNameGeo
+                      : bookingVehicle.driverNameEng}{' '}
+                    • {bookingVehicle.pricePerDay} ₾
+                  </p>
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setBookingSubmitted(true);
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">
+                      {t.inputName}
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      placeholder={t.inputNamePlaceholder}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">
+                      {t.inputPhone}
+                    </label>
+                    <input
+                      required
+                      type="tel"
+                      placeholder="599 XX XX XX"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 block mb-1">
+                        {t.inputDate}
+                      </label>
+                      <input
+                        required
+                        type="date"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 block mb-1">
+                        {t.inputPassengers}
+                      </label>
+                      <input
+                        required
+                        type="number"
+                        min="1"
+                        max={bookingVehicle.capacity}
+                        defaultValue={Math.min(18, bookingVehicle.capacity)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-600/30"
+                  >
+                    {t.submitBookingBtn}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* MODAL 4: B2B BUSINESS / DRIVER REGISTRATION MODAL                     */}
+      {/* ===================================================================== */}
+      {showAddB2BModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/65 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 border border-slate-100 shadow-2xl space-y-5 relative">
+            <button
+              onClick={() => setShowAddB2BModal(false)}
+              className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {b2bSubmitted ? (
+              <div className="text-center py-8 space-y-3">
+                <CheckCircle className="w-14 h-14 text-emerald-600 mx-auto" />
+                <h3 className="text-xl font-black text-slate-900">
+                  {lang === 'ka' ? 'განაცხადი მიღებულია!' : 'Listing Submitted!'}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {lang === 'ka'
+                    ? 'ჩვენი გუნდი გადაამოწმებს ინფორმაციას და 24 საათში გამოაქვეყნებს Xkursia.ge-ზე.'
+                    : 'Our team will verify your details and publish your listing within 24 hours.'}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-black text-slate-900">{t.addModalTitle}</h3>
+                  <p className="text-xs text-slate-500">{t.addModalSub}</p>
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setB2bSubmitted(true);
+                  }}
+                  className="space-y-3.5"
+                >
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">
+                      {lang === 'ka' ? 'ობიექტის / მანქანის დასახელება' : 'Venue or Vehicle Name'}
+                    </label>
+                    <input
+                      required
+                      type="text"
+                      placeholder={
+                        lang === 'ka'
+                          ? 'მაგ. ეკო-ქოხი "მწვანე ეზო" ან Mercedes Sprinter'
+                          : 'e.g., Green Yard Eco-Hut or Mercedes Sprinter'
+                      }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 block mb-1">
+                        {lang === 'ka' ? 'რეგიონი / ქალაქი' : 'Region / City'}
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="მაგ. იმერეთი / ქუთაისი"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 block mb-1">
+                        {lang === 'ka' ? 'საკონტაქტო ნომერი' : 'Phone Number'}
+                      </label>
+                      <input
+                        required
+                        type="tel"
+                        placeholder="5XX XX XX XX"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition"
+                  >
+                    {lang === 'ka' ? 'განაცხადის გაგზავნა' : 'Submit Registration'}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* FLOATING XKURSIA AI ASSISTANT WIDGET                                  */}
+      {/* ===================================================================== */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {aiOpen ? (
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-80 sm:w-96 flex flex-col h-[500px] overflow-hidden">
+            <div className="bg-slate-900 text-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm">{t.aiTitle}</h4>
+                  <span className="text-[10px] text-emerald-400 block">{t.aiStatus}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setAiOpen(false)}
+                className="p-1.5 hover:bg-slate-800 rounded-full text-slate-400 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50">
+              {chatMessages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[82%] rounded-2xl p-3 text-xs leading-relaxed whitespace-pre-line ${
+                      msg.sender === 'user'
+                        ? 'bg-emerald-600 text-white rounded-br-none'
+                        : 'bg-white text-slate-800 border border-slate-200 shadow-sm rounded-bl-none'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto text-[11px]">
+              {[t.aiPrompt1, t.aiPrompt2, t.aiPrompt3].map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSendMessage(prompt.replace('💡 ', ''))}
+                  className="px-2.5 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded-full whitespace-nowrap font-semibold transition"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+              <input
+                type="text"
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder={t.aiInputPlaceholder}
+                className="flex-1 bg-slate-100 border-none rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <button
+                onClick={() => handleSendMessage()}
+                className="p-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setAiOpen(true)}
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3.5 rounded-full shadow-2xl font-extrabold text-xs transition transform hover:scale-105 border-2 border-white/20"
+          >
+            <Sparkles className="w-5 h-5 text-emerald-200" />
+            <span>{t.navAi}</span>
+          </button>
+        )}
+      </div>
+
+      {/* ===================================================================== */}
+      {/* FOOTER                                                                */}
+      {/* ===================================================================== */}
+      <footer className="mt-auto bg-slate-950 text-slate-400 py-10 border-t border-slate-800 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-black text-white text-base">
+              Xkursia<span className="text-emerald-500">.ge</span>
+            </span>
+            <span>{t.footerRights}</span>
+          </div>
+
+          <div className="flex flex-wrap gap-6 font-bold">
+            <button
+              onClick={() => {
+                setB2bSubmitted(false);
+                setShowAddB2BModal(true);
+              }}
+              className="hover:text-emerald-400 transition"
+            >
+              {t.driverReg}
+            </button>
+            <a href="#terms" className="hover:text-white transition">
+              {t.terms}
+            </a>
+            <a href="#contact" className="hover:text-white transition">
+              {t.contact}
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
